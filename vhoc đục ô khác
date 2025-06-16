@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Test Điền Vào Chỗ Trống</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for longer content */
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 20px; /* Space from top */
+        }
+        .question-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            /* No border-bottom here as we only show one question at a time */
+        }
+        .correct {
+            color: #10B981; /* Green for correct answers */
+            font-weight: 500;
+        }
+        .incorrect {
+            color: #EF4444; /* Red for incorrect answers */
+            font-weight: 500;
+        }
+        .feedback {
+            margin-top: 5px;
+            font-size: 0.875rem; /* Small text */
+        }
+        input[type="text"] {
+            border: 1px solid #D1D5DB; /* Light gray border */
+            padding: 10px 12px;
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #6366F1; /* Purple on focus */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        button:hover {
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .submit-button {
+            background-color: #6366F1; /* Purple */
+            color: white;
+            border: none;
+        }
+        .submit-button:hover {
+            background-color: #4F46E5; /* Darker purple */
+        }
+        .next-button {
+            background-color: #22C55E; /* Green */
+            color: white;
+            border: none;
+        }
+        .next-button:hover {
+            background-color: #16A34A; /* Darker green */
+        }
+        .reset-button {
+            background-color: #F3F4F6; /* Light gray */
+            color: #4B5563; /* Dark gray text */
+            border: 1px solid #D1D5DB;
+        }
+        .reset-button:hover {
+            background-color: #E5E7EB; /* Slightly darker light gray */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Bài Test Ôn Tập: Điền Vào Chỗ Trống</h1>
+
+        <div id="quiz-form">
+            <!-- Questions will be loaded here by JavaScript -->
+        </div>
+
+        <div class="flex justify-center gap-4 mt-8">
+            <button id="submit-btn" class="submit-button">Kiểm Tra Đáp Án</button>
+            <button id="next-btn" class="next-button hidden">Câu Kế Tiếp</button>
+            <button id="reset-btn" class="reset-button">Làm Lại</button>
+        </div>
+
+        <div id="results" class="mt-8 pt-6 border-t border-gray-200 hidden">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Kết Quả Của Bạn</h2>
+            <div id="score-summary" class="text-lg font-medium text-center mb-6"></div>
+        </div>
+    </div>
+
+    <script>
+        // Array containing all questions and their correct answers
+        const originalQuestionsAndAnswers = [
+  { question: "Native American literature primarily consisted of _____ such as legends and myths.", answer: "oral traditions" },
+  { question: "Creation myths often describe the origins of the world and _____.", answer: "humankind" },
+  { question: "Much of Native American literature was lost due to _____ of culture.", answer: "colonization" },
+  { question: "Native American creation myths often explain natural phenomena and _____ origins.", answer: "humankind's" },
+  { question: "The oral tradition was essential for preserving _____ culture and traditions.", answer: "Native Americans’" },
+  { question: "Exploration narratives were written by early settlers to _____ their discoveries.", answer: "document" },
+  { question: "Travel narratives provided accounts of the landscape and _____ across the country.", answer: "challenges" },
+  { question: "Religious writings dominated the literature of the _____ era.", answer: "Puritan" },
+  { question: "The Salem Witch Trials influenced Puritan literature’s focus on sin and _____.", answer: "morality" },
+  { question: "The first American novel, The Power of Love, was written by _____ Hill Brown.", answer: "William" },
+  { question: "Anne Bradstreet’s poetry reflected inspiration from the _____ environment of America.", answer: "New England" },
+  { question: "The first volume of poetry in America was titled _____ and published in 1650.", answer: "\"The Tenth Muse\"" },
+  { question: "Early American fiction began to develop after the _____ Revolution.", answer: "American" },
+  { question: "The Enlightenment introduced ideas of reason and _____ discovery into American literature.", answer: "scientific" },
+  { question: "Political writings during the Enlightenment promoted freedom as a natural _____.", answer: "right" },
+  { question: "Romanticism stressed _____ over reason.", answer: "emotion" },
+  { question: "Washington Irving’s The Sketch Book of Geoffrey Crayon helped shape American _____.", answer: "literature" },
+  { question: "Rip Van Winkle slept for _____ years.", answer: "twenty" },
+  { question: "Rip Van Winkle reflects the transition from colonial America to _____ America.", answer: "post-Revolutionary" },
+  { question: "The Catskill Mountains in Rip Van Winkle symbolize the power of _____.", answer: "nature" },
+  { question: "Rip Van Winkle slept through the _____ Revolution.", answer: "American" },
+  { question: "Romanticism often romanticized rural life and the _____.", answer: "frontier" },
+  { question: "Washington Irving’s works reflect themes of nostalgia and _____.", answer: "change" },
+  { question: "Transcendentalist literature emphasized individualism and a connection to _____.", answer: "nature" },
+  { question: "Romantic poetry often used imagery to highlight emotional _____.", answer: "intensity" },
+  { question: "Symbolism in Transcendentalist literature ties abstract ideas to _____ elements.", answer: "concrete" },
+  { question: "Uncle Tom’s Cabin critiques the institution of _____.", answer: "slavery" },
+  { question: "Harriet Beecher Stowe wrote Uncle Tom’s Cabin to promote the abolition of _____.", answer: "slavery" },
+  { question: "Simon Legree in Uncle Tom’s Cabin symbolizes the cruelty of _____.", answer: "slavery" },
+  { question: "The martyrdom of Uncle Tom serves as a critique of _____.", answer: "injustice" },
+  { question: "Uncle Tom’s Cabin emphasizes the moral conflict of _____.", answer: "freedom" },
+  { question: "The North and South in Uncle Tom’s Cabin reflect broader themes of _____.", answer: "oppression" },
+  { question: "Harriet Beecher Stowe used religion to highlight the injustice of _____.", answer: "slavery" },
+  { question: "Realist literature focuses on the accurate depiction of _____ life.", answer: "ordinary" },
+  { question: "Realism avoids romanticized depictions of _____.", answer: "idealized realities" },
+  { question: "Naturalist literature often highlights characters struggling against _____ environments.", answer: "harsh" },
+  { question: "Naturalist literature portrays characters as shaped by _____ forces.", answer: "external" },
+  { question: "Realism emerged in American literature after the _____ War.", answer: "Civil" },
+  { question: "Twain’s The Adventures of Tom Sawyer satirizes the hypocrisy of _____ life.", answer: "small-town" },
+  { question: "The whitewashing scene highlights Tom Sawyer’s creativity and _____.", answer: "resourcefulness" },
+  { question: "Aunt Polly punishes Tom by making him _____ the fence.", answer: "whitewash" },
+  { question: "Tom uses trinkets to buy tickets in _____ school.", answer: "Sunday" },
+  { question: "Huckleberry Finn serves as a foil to Tom Sawyer, reflecting _____ values.", answer: "independent" },
+  { question: "The Mississippi River symbolizes freedom and the possibility of _____.", answer: "escape" },
+  { question: "Twain uses humor to contrast Tom’s imagination with adult _____.", answer: "responsibilities" },
+  { question: "Twain critiques societal norms using satire and _____.", answer: "irony" },
+  { question: "Twain’s portrayal of Injun Joe highlights racial and cultural _____.", answer: "biases" },
+  { question: "Modernism deliberately breaks away from _____ themes and styles.", answer: "traditional" },
+  { question: "Modernist literature focuses on searching for new ideas and breaking with _____.", answer: "tradition" },
+  { question: "Hemingway’s writing style is characterized by concise dialogue and _____.", answer: "simplicity" },
+  { question: "The Old Man and the Sea is set near a fishing village and the Gulf of _____.", answer: "Mexico" },
+  { question: "Santiago battles the marlin for three days without giving up _____.", answer: "hope" },
+  { question: "The marlin in Hemingway’s novella symbolizes pride and _____.", answer: "dignity" },
+  { question: "The novella demonstrates the theme of strength through _____.", answer: "perseverance" },
+  { question: "Hemingway’s iceberg theory emphasizes what is left beneath the _____.", answer: "surface" },
+  { question: "Hemingway uses repetition to reflect Santiago’s _____.", answer: "perseverance" },
+  { question: "Sparse dialogue underscores themes of isolation and _____.", answer: "solitude" },
+  { question: "Hemingway’s vivid description of the marlin highlights his use of imagery and _____.", answer: "symbolism" },
+  { question: "Naturalist literature often portrays the struggle between humans and _____ forces.", answer: "natural" },
+  { question: "The Old Man and the Sea critiques societal definitions of success and _____.", answer: "achievement" },
+  { question: "Santiago refers to the marlin as his _____, symbolizing respect for nature.", answer: "brother" },
+  { question: "Native American legends often employ vivid _____ imagery.", answer: "visual" },
+  { question: "The Enlightenment introduced ideas of reason and logic into American _____.", answer: "literature" },
+  { question: "Travel narratives reflected the diversity and challenges of early _____.", answer: "America" },
+  { question: "Romanticism emphasizes imagination and emotional _____.", answer: "depth" },
+  { question: "Washington Irving’s stories depict America’s transformation through _____.", answer: "nostalgia" },
+  { question: "Harriet Beecher Stowe used the death of Uncle Tom to inspire readers to _____ slavery.", answer: "abolish" },
+  { question: "Twain critiques the small-mindedness of authority figures using _____.", answer: "satire" },
+  { question: "Santiago’s long battle represents the human capacity for _____.", answer: "resilience" },
+  { question: "Modernism reflects the increasing _____ of 20th-century society.", answer: "complexity" }
+        ];
+
+        // Global variables to manage quiz state
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        // Element references
+        const quizForm = document.getElementById('quiz-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const resultsDiv = document.getElementById('results');
+        const scoreSummary = document.getElementById('score-summary');
+
+        /**
+         * Shuffles an array in place using the Fisher-Yates (Knuth) algorithm.
+         * @param {Array} array The array to shuffle.
+         */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+        }
+
+        /**
+         * Initializes or resets the quiz.
+         */
+        function startQuiz() {
+            // Create a shuffled copy of the original questions
+            shuffledQuestions = [...originalQuestionsAndAnswers];
+            shuffleArray(shuffledQuestions);
+
+            currentQuestionIndex = 0;
+            score = 0;
+
+            // Reset UI elements
+            resultsDiv.classList.add('hidden');
+            submitBtn.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+            scoreSummary.textContent = ''; // Clear previous score summary
+
+            displayCurrentQuestion(); // Display the first question
+        }
+
+        /**
+         * Displays the current question or the final results if the quiz is finished.
+         */
+        function displayCurrentQuestion() {
+            quizForm.innerHTML = ''; // Clear previous question content
+
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const qa = shuffledQuestions[currentQuestionIndex];
+                // Split question to insert input field
+                const parts = qa.question.split('__________');
+                const questionHtml = `
+                    <div class="question-item">
+                        <label for="answer-input" class="text-gray-700 text-base block mb-2">
+                            Câu ${currentQuestionIndex + 1}/${shuffledQuestions.length}: ${parts[0]}<input type="text" id="answer-input" class="inline-block mt-2" placeholder="Điền vào đây">${parts[1]}
+                        </label>
+                        <div id="feedback-current" class="feedback text-sm"></div>
+                    </div>
+                `;
+                quizForm.innerHTML = questionHtml;
+
+                submitBtn.classList.remove('hidden'); // Show "Check Answer" button
+                nextBtn.classList.add('hidden'); // Hide "Next Question" button
+                document.getElementById('answer-input').focus(); // Focus on the input field for user convenience
+            } else {
+                showFinalResults(); // All questions answered
+            }
+        }
+
+        /**
+         * Checks the user's answer for the current question and provides feedback.
+         */
+        function checkCurrentAnswer() {
+            const inputElement = document.getElementById('answer-input');
+            const feedbackElement = document.getElementById('feedback-current');
+            const qa = shuffledQuestions[currentQuestionIndex];
+
+            const userAnswer = inputElement.value.trim().toLowerCase();
+            const correctAnswer = qa.answer.trim().toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                score++;
+                feedbackElement.classList.remove('incorrect');
+                feedbackElement.classList.add('correct');
+                feedbackElement.textContent = 'Đúng!';
+                inputElement.classList.add('border-green-500'); // Green border for correct
+                inputElement.classList.remove('border-red-500'); // Remove red if previously incorrect
+            } else {
+                feedbackElement.classList.remove('correct');
+                feedbackElement.classList.add('incorrect');
+                feedbackElement.innerHTML = `Sai. Đáp án đúng: <span class="font-bold">${qa.answer}</span>`;
+                inputElement.classList.add('border-red-500'); // Red border for incorrect
+                inputElement.classList.remove('border-green-500'); // Remove green if previously correct
+            }
+            inputElement.setAttribute('readonly', true); // Disable input after checking
+
+            submitBtn.classList.add('hidden'); // Hide "Check Answer" button
+            nextBtn.classList.remove('hidden'); // Show "Next Question" button
+        }
+
+        /**
+         * Displays the final score and quiz completion message.
+         */
+        function showFinalResults() {
+            quizForm.innerHTML = '<p class="text-xl text-gray-700 text-center">Bạn đã hoàn thành bài test!</p>'; // Clear question area and show message
+            scoreSummary.textContent = `Bạn đã trả lời đúng ${score} trên ${shuffledQuestions.length} câu.`;
+            resultsDiv.classList.remove('hidden'); // Show final results
+            submitBtn.classList.add('hidden'); // Hide "Check Answer" button
+            nextBtn.classList.add('hidden'); // Hide "Next Question" button
+        }
+
+        // Event Listeners
+        window.onload = startQuiz; // Start the quiz when the page loads
+        submitBtn.addEventListener('click', checkCurrentAnswer);
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++; // Move to the next question
+            displayCurrentQuestion(); // Display the next question
+        });
+        resetBtn.addEventListener('click', startQuiz); // Restart quiz on "Làm Lại" button click
+
+    </script>
+</body>
+</html>
